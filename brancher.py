@@ -1,32 +1,33 @@
 #!/bin/python
+"""Main file"""
 
-import random
-import math
-import Node
-import Util
-import IfGen
+import node
+import codegen
 
 
-
-def generate_code(variables, functions, root, indentation):
+def generate_code(root, indentation):
+    """Generates the whole code file"""
     result = "#include \"klee/klee.h\"\n\n"
-    for x in functions:
-       result += IfGen.gen_function(x, indentation) + "\n"
-    
+    my_cg = codegen.CodeGenerator(5, 3)
+
+    for cur_fun in my_cg.functions:
+        result += codegen.gen_function(cur_fun, indentation) + "\n"
+
     result += "int main(int argc, char** args) {\n"
-    for x in variables:
-        result += indentation + "int " + x + "; "
-        result += indentation+ ("klee_make_symbolic(&%s, sizeof(%s), \"%s\");\n" % (x, x, x)) 
-    result += indentation + "klee_open_merge();\n" 
-    result += IfGen.gen_tree(variables, functions, root, 1, indentation)
-    result += indentation + "klee_close_merge();\n" 
-    result += "}\n"
+    for cur_var in my_cg.variables:
+        result += indentation + "int " + cur_var + "; "
+        result += indentation + \
+            ("klee_make_symbolic(&%s, sizeof(%s), \"%s\");\n" % (cur_var, cur_var, cur_var))
+
+    result += indentation + "klee_open_merge();\n"
+    result += my_cg.gen_tree(root, level=1)
+    result += indentation + "klee_close_merge();\n"
+    result += "}"
     return result
 
 
-VAR = ["var_" + str(x) for x in range(1, 5)]
-FUN = [("fun_" + str(x), Util.log_weight_random(1, 4, 4)) for x in range(1, 3)]
-ROOT = Node.createTree(3, 2, 3)
-INDENT = "  "
+if __name__ == "__main__":
+    ROOT = node.create_tree(3, 2, 3)
+    INDENT = "  "
 
-print(generate_code(VAR, FUN, ROOT, INDENT))
+    print(generate_code(ROOT, INDENT))
