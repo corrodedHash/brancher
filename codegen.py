@@ -49,8 +49,8 @@ class CodeGenerator:
             if not start:
                 result = print_if_statement(which, level) + " {\n"
                 result += self.gen_stuff(level + 1)
-            if cur_node.getChildren():
-                child_list = list(cur_node.getChildren())
+            if cur_node.get_children():
+                child_list = list(cur_node.get_children())
                 result += print_if_clause(child_list[0], "first", level + 1)
 
                 for child in child_list[1:-1]:
