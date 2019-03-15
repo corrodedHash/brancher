@@ -7,7 +7,8 @@ import node
 
 class CodeGenerator:
     """Generates code"""
-    def __init__(self, var_count, fun_count, indent="  "):
+
+    def __init__(self: CodeGenerator, var_count: int, fun_count: int, indent: str = "  ") -> None:
         self.variables = ["var_" + str(x) for x in range(1, var_count + 1)]
         self.functions = [
             ("fun_" + str(x),
