@@ -1,9 +1,9 @@
 """Contains helper functions"""
-import random
 import math
+import random
 
 
-def log_weight_random(start, end, base=2):
+def log_weight_random(start: int, end: int, base: float = 2) -> int:
     """Returns a random int, with logarithmic probability distribution"""
     assert start < end
     randrange_end = math.ceil(base ** ((end + 1 - start)) - 1)

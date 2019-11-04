@@ -1,37 +1,37 @@
 """Contains functions to generate C code"""
 import random
+from typing import List, Tuple
 
-import util
-import node
+from . import node, util
 
 
 class CodeGenerator:
     """Generates code"""
 
-    def __init__(self: CodeGenerator, var_count: int, fun_count: int, indent: str = "  ") -> None:
-        self.variables = ["var_" + str(x) for x in range(1, var_count + 1)]
-        self.functions = [
-            ("fun_" + str(x),
-             util.log_weight_random(
-                 1,
-                 4,
-                 4)) for x in range(
-                     1,
-                     fun_count + 1)]
+    def __init__(self, var_count: int, fun_count: int, indent: str = "  ") -> None:
+        self.variables: List[str] = ["var_" + str(x) for x in range(1, var_count + 1)]
+        self.functions: List[Tuple[str, int]] = [
+            ("fun_" + str(x), util.log_weight_random(1, 4, 4))
+            for x in range(1, fun_count + 1)
+        ]
 
         self._indent = indent
 
-    def gen_stuff(self, level):
+    def gen_stuff(self, level: int) -> str:
         """Generates a few lines of assignments and function calls"""
         result = ""
         for _ in range(1, util.log_weight_random(2, 10)):
-            result += (level * self._indent) + \
-                gen_assignment(self.variables, self.functions) + ";\n"
+            result += (
+                (level * self._indent)
+                + gen_assignment(self.variables, self.functions)
+                + ";\n"
+            )
         return result
 
-    def gen_tree(self, tree, level=0):
+    def gen_tree(self, tree: node.Node, level: int = 0) -> str:
         """Generates nested if clauses based on given tree"""
-        def print_if_statement(which, level):
+
+        def print_if_statement(which: str, level: int) -> str:
             """Print the keyword to the if branch"""
             result = self._indent * level
             if which == "first":
@@ -42,7 +42,9 @@ class CodeGenerator:
                 result += "else if (" + gen_clause(self.variables) + ")"
             return result
 
-        def print_if_clause(cur_node, which, level, start=False):
+        def print_if_clause(
+            cur_node: node.Node, which: str, level: int, start: bool = False
+        ) -> str:
             """Print the clause for an if statement"""
             result = ""
             if start:
@@ -65,10 +67,9 @@ class CodeGenerator:
         return print_if_clause(tree, "first", level, True)
 
 
-def gen_function(function, indent="  "):
+def gen_function(name: str, var_count: int, indent: str = "  ") -> str:
     """Generates a function with given function name"""
-    my_cg = CodeGenerator(function[1], 0, indent)
-    name = function[0]
+    my_cg = CodeGenerator(var_count, 0, indent)
     parameters = my_cg.variables
     result = "int " + name + " (" + ", ".join(parameters) + ") {\n"
     result += indent + "int result = " + str(random.randint(0, 200)) + ";\n"
@@ -79,18 +80,22 @@ def gen_function(function, indent="  "):
     return result
 
 
-def gen_clause(variables):
+def gen_clause(variables: List[str]) -> str:
     """Generates a boolean statement with given variables"""
     var = random.sample(variables, 1)[0]
-    operator = random.choice(['%', '<', '>'])
-    if operator == '%':
-        return var + " " + operator + " " + \
-            str(random.randint(2, 30)) + " == 0"
-    return var + " " + operator + " " + \
-        str(random.randint(1, 9) * (10 ** random.randint(1, 3)))
+    operator = random.choice(["%", "<", ">"])
+    if operator == "%":
+        return var + " " + operator + " " + str(random.randint(2, 30)) + " == 0"
+    return (
+        var
+        + " "
+        + operator
+        + " "
+        + str(random.randint(1, 9) * (10 ** random.randint(1, 3)))
+    )
 
 
-def gen_term(variables):
+def gen_term(variables: List[str]) -> str:
     """Generates a term using given variables"""
     if random.randint(1, 10) == 1:
         return str(random.randint(5, 200))
@@ -102,14 +107,14 @@ def gen_term(variables):
     return result
 
 
-def gen_function_call(variables, functions):
+def gen_function_call(variables: List[str], functions: List[Tuple[str, int]]) -> str:
     """Generates a function call"""
     cur_fun = random.sample(functions, 1)[0]
     cur_vars = random.sample(variables, cur_fun[1])
     return cur_fun[0] + "(" + ", ".join(cur_vars) + ")"
 
 
-def gen_assignment(variables, functions):
+def gen_assignment(variables: List[str], functions: List[Tuple[str, int]]) -> str:
     """Generates assignment to random variable"""
     var = random.choice(variables)
     if functions and random.randint(1, 10) < 3:

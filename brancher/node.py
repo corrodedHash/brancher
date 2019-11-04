@@ -1,10 +1,17 @@
 """Contains Node class"""
 import random
+from typing import Iterator, Optional, Set
 
 
 class Node:
     """Treenode"""
-    def __init__(self, node_id, ancestor=None, childs=None):
+
+    def __init__(
+        self,
+        node_id: int,
+        ancestor: Optional["Node"] = None,
+        childs: Optional[Set["Node"]] = None,
+    ):
         if childs is None:
             childs = set()
         assert isinstance(childs, set)
@@ -15,13 +22,13 @@ class Node:
         self._anc_count = 0
         self._depth = 1
 
-    def _update_depth(self, new_depth):
+    def _update_depth(self, new_depth: int) -> None:
         if self._depth < new_depth:
             self._depth = new_depth
-            if self._ancestor:
+            if self._ancestor is not None:
                 self._ancestor._update_depth(new_depth + 1)
 
-    def add_node(self, node):
+    def add_node(self: "Node", node: "Node") -> None:
         """Adds node as child"""
         assert isinstance(node, Node)
         assert node._ancestor is None
@@ -32,35 +39,39 @@ class Node:
         self._childs.add(node)
         self._update_depth(node._depth + 1)
 
-    def iter_in_order(self):
+    def iter_in_order(self) -> Iterator["Node"]:
         """Generator. Iterates through tree in-order"""
         yield self
         for child in self._childs:
             for inorder_child in child.iter_in_order():
                 yield inorder_child
 
-    def get_max_path_len(self):
+    def get_max_path_len(self) -> int:
         """Get the longest path that this node is part of"""
         return self._anc_count + self._depth
 
-    def get_children(self):
+    def get_children(self) -> Set["Node"]:
         """Return list of children nodes"""
         return self._childs
 
-    def indent_print(self, level):
+    def indent_print(self, level: int) -> str:
         """Prints tree kinda fancy"""
         indenter = "|-"
         result = (indenter * level) + str(self._node_id)
         if self._childs:
-            result += '\n'
-            result += '\n'.join(list(map(lambda x: x.indent_print(level + 1), self._childs)))
+            result += "\n"
+            result += "\n".join(
+                list(map(lambda x: x.indent_print(level + 1), self._childs))
+            )
         return result
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.indent_print(0)
 
 
-def create_tree(max_childs, min_childs, max_depth, node_count=None):
+def create_tree(
+    max_childs: int, min_childs: int, max_depth: int, node_count: Optional[int] = None
+) -> Node:
     """Generate random tree with given parameters"""
     max_node_count = int(((max_childs ** max_depth) - 1) / (max_childs - 1))
     if node_count is None:
@@ -74,7 +85,7 @@ def create_tree(max_childs, min_childs, max_depth, node_count=None):
     active_set.add(root)
     for next_id in range(1, node_count):
         if not active_set:
-            print('fail ' + str(next_id))
+            print("fail " + str(next_id))
             return root
 
         anc_node = random.sample(active_set, 1)[0]

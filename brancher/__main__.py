@@ -1,8 +1,8 @@
 #!/bin/python
 """Main file"""
 
-import node
-import codegen
+from . import node
+from . import codegen
 
 
 def generate_code(root, indentation):
