@@ -5,13 +5,13 @@ from . import node
 from . import codegen
 
 
-def generate_code(root, indentation):
+def generate_code(root: node.Node, indentation: str) -> str:
     """Generates the whole code file"""
     result = "#include \"klee/klee.h\"\n\n"
     my_cg = codegen.CodeGenerator(5, 3)
 
     for cur_fun in my_cg.functions:
-        result += codegen.gen_function(cur_fun, indentation) + "\n"
+        result += codegen.gen_function(cur_fun[0], cur_fun[1], indentation) + "\n"
 
     result += "int main(int argc, char** args) {\n"
     for cur_var in my_cg.variables:
