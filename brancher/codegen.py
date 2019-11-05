@@ -70,10 +70,14 @@ class CodeGenerator:
 def gen_function(name: str, var_count: int, indent: str = "  ") -> str:
     """Generates a function with given function name"""
     my_cg = CodeGenerator(var_count, 0, indent)
+
     parameters = my_cg.variables
-    result = "int " + name + " (" + ", ".join(parameters) + ") {\n"
-    result += indent + "int result = " + str(random.randint(0, 200)) + ";\n"
+    parameter_list = ", ".join(parameters)
+
     my_cg.variables.append("result")
+
+    result = "int " + name + " (" + parameter_list + ") {\n"
+    result += indent + "int result = " + str(random.randint(0, 200)) + ";\n"
     result += my_cg.gen_tree(node.create_tree(3, 2, 3, 5), level=1)
     result += indent + "return result;\n"
     result += "}\n"
@@ -82,17 +86,12 @@ def gen_function(name: str, var_count: int, indent: str = "  ") -> str:
 
 def gen_clause(variables: List[str]) -> str:
     """Generates a boolean statement with given variables"""
-    var = random.sample(variables, 1)[0]
+    var = random.choice(variables)
     operator = random.choice(["%", "<", ">"])
     if operator == "%":
         return var + " " + operator + " " + str(random.randint(2, 30)) + " == 0"
-    return (
-        var
-        + " "
-        + operator
-        + " "
-        + str(random.randint(1, 9) * (10 ** random.randint(1, 3)))
-    )
+    random_comparison_int = str(random.randint(1, 9) * (10 ** random.randint(1, 3)))
+    return f"{var} {operator} {random_comparison_int}"
 
 
 def gen_term(variables: List[str]) -> str:
@@ -103,20 +102,22 @@ def gen_term(variables: List[str]) -> str:
     chosen_vars = random.sample(variables, num_vars)
     result = chosen_vars[0]
     for cur_var in chosen_vars[1:]:
-        result += " " + random.choice(["+", "-", "*"]) + " " + cur_var
+        operator = random.choice(["+", "-", "*"])
+        result += f" {operator} {cur_var}"
     return result
 
 
 def gen_function_call(variables: List[str], functions: List[Tuple[str, int]]) -> str:
     """Generates a function call"""
-    cur_fun = random.sample(functions, 1)[0]
+    cur_fun = random.choice(functions)
     cur_vars = random.sample(variables, cur_fun[1])
-    return cur_fun[0] + "(" + ", ".join(cur_vars) + ")"
+    argument_list = ", ".join(cur_vars)
+    return cur_fun[0] + "(" + argument_list + ")"
 
 
 def gen_assignment(variables: List[str], functions: List[Tuple[str, int]]) -> str:
     """Generates assignment to random variable"""
     var = random.choice(variables)
     if functions and random.randint(1, 10) < 3:
-        return var + " = " + gen_function_call(variables, functions)
-    return var + " = " + gen_term(variables)
+        return f"{var} = {gen_function_call(variables, functions)}"
+    return f"{var} = {gen_term(variables)}"
